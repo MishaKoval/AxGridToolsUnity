@@ -1,42 +1,25 @@
-﻿using System.Collections;
-using AxGrid;
+﻿using AxGrid;
 using AxGrid.Base;
 using AxGrid.FSM;
 using AxGrid.Path;
 using TaskSolution.States;
 using UnityEngine;
-using UnityEngine.Rendering;
-using UnityEngine.Rendering.Universal;
 
-namespace TaskSolution
+namespace TaskSolution.StateControllers
 {
     public class WorkerController : MonoBehaviourExt,IStateController
     {
-        [SerializeField] private VolumeProfile volumeProfile;
         [SerializeField] private float moveTime;
         [SerializeField] private Transform homeTransform;
         [SerializeField] private Transform workTransform;
         [SerializeField] private Transform shopTransform;
-        [SerializeField] private float waitBloomTime;
-        
-        private const float defaultBloomValue = 1f;
-        private const float changeStateBloomValue = 22f;
-        private WaitForSeconds _waitBloom;
         private FSMState currentState;
-        private int Score;
-
-        [OnAwake]
-        private void OnAwake()
-        {
-            _waitBloom = new WaitForSeconds(waitBloomTime);
-            ChangeBloomValue(defaultBloomValue);
-           
-        }
-
+        private int score;
+        
         [OnStart(-1)]
         private void OnStart()
         {
-            Settings.GlobalModel.Set("Score",Score);
+            Settings.GlobalModel.Set("Score",score);
         }
 
         [OnUpdate]
@@ -49,28 +32,20 @@ namespace TaskSolution
                 case HomeState:
                     break;
                 case ShopState:
-                    if (Score > 0)
+                    if (score > 0)
                     {
-                        Score--;
+                        score--;
                     }
                     break;
                 case WorkState:
-                    Score++;
+                    score++;
                     break;
             } 
-            Settings.GlobalModel.Set("Score",Score);
+            Settings.GlobalModel.Set("Score",score);
         }
 
         public void Enter(FSMState state)
         {
-            if (currentState != null)
-            {
-                if (currentState != state)
-                {
-                    ChangeBloomValue(changeStateBloomValue);
-                    StartCoroutine(WaitBloom());
-                }
-            }
             currentState = state;
             Path = null;
             if (state is HomeState)
@@ -106,20 +81,6 @@ namespace TaskSolution
         {
             Path = new CPath().EasingLinear(moveTime, 0, 1,
                 (f) => transform.position = Vector3.Lerp(transform.position, homeTransform.position, f));
-        }
-        
-        private IEnumerator WaitBloom()
-        {
-            yield return _waitBloom;
-            ChangeBloomValue(defaultBloomValue);
-        }
-        
-        private void ChangeBloomValue(float value)
-        {
-            if (volumeProfile.TryGet(out Bloom bloom))
-            {
-                bloom.intensity.value = value;
-            }
         }
     }
 }

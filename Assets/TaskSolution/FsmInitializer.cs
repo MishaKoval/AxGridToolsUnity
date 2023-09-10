@@ -1,8 +1,8 @@
-﻿using System.Collections.Generic;
-using AxGrid.Base;
+﻿using AxGrid.Base;
 using AxGrid;
 using AxGrid.FSM;
 using AxGrid.Model;
+using TaskSolution.StateControllers;
 using TaskSolution.States;
 using UnityEngine;
 
@@ -10,17 +10,18 @@ namespace TaskSolution
 {
     public class FsmInitializer : MonoBehaviourExtBind
     {
-        [SerializeField] private WorkerController workerController;
+        [SerializeField] private StateControllersInitializer stateControllersInitializer;
         
         [OnStart]
         private void StartThis()
         {
             Log.Debug("InitFsm");
+            var stateControllers = stateControllersInitializer.GetStateControllers();
             Settings.Fsm = new FSM();
             Settings.Fsm.Add(new InitState());
-            Settings.Fsm.Add(new HomeState(new List<IStateController>(){workerController}));
-            Settings.Fsm.Add(new WorkState(new List<IStateController>(){workerController}));
-            Settings.Fsm.Add(new ShopState(new List<IStateController>(){workerController}));
+            Settings.Fsm.Add(new HomeState(stateControllers));
+            Settings.Fsm.Add(new WorkState(stateControllers));
+            Settings.Fsm.Add(new ShopState(stateControllers));
             Settings.Fsm.Start("Init");
         }
 

@@ -1,6 +1,6 @@
 ﻿using AxGrid.FSM;
 
-namespace TaskSolution.States
+namespace TaskSolution
 {
     public interface IStateController
     {
